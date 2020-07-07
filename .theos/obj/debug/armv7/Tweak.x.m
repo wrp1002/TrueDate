@@ -2,13 +2,17 @@
 
 
 
-
+ 
 
 
 #define PLIST_PATH @"/var/mobile/Library/Preferences/com.wrp1002.truedateprefs.plist"
 
 bool GetPrefsBool(NSString *key) {
 	return [[[NSDictionary dictionaryWithContentsOfFile:PLIST_PATH] valueForKey:key] boolValue];
+}
+
+int GetPrefsInt(NSString *key) {
+	return [[[NSDictionary dictionaryWithContentsOfFile:PLIST_PATH] valueForKey:key] integerValue];
 }
 
 
@@ -95,7 +99,7 @@ void ShowAlert(NSString *msg) {
 @class NSDateFormatter; @class SpringBoard; @class NSDateComponents; 
 static void (*_logos_orig$_ungrouped$SpringBoard$applicationDidFinishLaunching$)(_LOGOS_SELF_TYPE_NORMAL SpringBoard* _LOGOS_SELF_CONST, SEL, id); static void _logos_method$_ungrouped$SpringBoard$applicationDidFinishLaunching$(_LOGOS_SELF_TYPE_NORMAL SpringBoard* _LOGOS_SELF_CONST, SEL, id); static long long (*_logos_orig$_ungrouped$NSDateComponents$weekday)(_LOGOS_SELF_TYPE_NORMAL NSDateComponents* _LOGOS_SELF_CONST, SEL); static long long _logos_method$_ungrouped$NSDateComponents$weekday(_LOGOS_SELF_TYPE_NORMAL NSDateComponents* _LOGOS_SELF_CONST, SEL); static id (*_logos_orig$_ungrouped$NSDateFormatter$stringFromDate$)(_LOGOS_SELF_TYPE_NORMAL NSDateFormatter* _LOGOS_SELF_CONST, SEL, id); static id _logos_method$_ungrouped$NSDateFormatter$stringFromDate$(_LOGOS_SELF_TYPE_NORMAL NSDateFormatter* _LOGOS_SELF_CONST, SEL, id); 
 
-#line 73 "Tweak.x"
+#line 77 "Tweak.x"
 
 
 	static void _logos_method$_ungrouped$SpringBoard$applicationDidFinishLaunching$(_LOGOS_SELF_TYPE_NORMAL SpringBoard* _LOGOS_SELF_CONST __unused self, SEL __unused _cmd, id application) {
@@ -114,9 +118,9 @@ static void (*_logos_orig$_ungrouped$SpringBoard$applicationDidFinishLaunching$)
 		
 
 		bool active = GetPrefsBool(@"kActive");
-		
+		int time = GetPrefsInt(@"kTime");
 
-		NSString *msg = [NSString stringWithFormat:@"Weekday:%ld  Hour:%ld  Active: %s", weekday, (long)hour, active ? "true" : "false"];
+		NSString *msg = [NSString stringWithFormat:@"Weekday:%ld  Hour:%ld  Active: %s  Time:%ld", weekday, (long)hour, active ? "true" : "false", time];
 
 		ShowAlert(msg);
 	}
@@ -172,4 +176,4 @@ static void (*_logos_orig$_ungrouped$SpringBoard$applicationDidFinishLaunching$)
 
 static __attribute__((constructor)) void _logosLocalInit() {
 {Class _logos_class$_ungrouped$SpringBoard = objc_getClass("SpringBoard"); { MSHookMessageEx(_logos_class$_ungrouped$SpringBoard, @selector(applicationDidFinishLaunching:), (IMP)&_logos_method$_ungrouped$SpringBoard$applicationDidFinishLaunching$, (IMP*)&_logos_orig$_ungrouped$SpringBoard$applicationDidFinishLaunching$);}Class _logos_class$_ungrouped$NSDateComponents = objc_getClass("NSDateComponents"); { MSHookMessageEx(_logos_class$_ungrouped$NSDateComponents, @selector(weekday), (IMP)&_logos_method$_ungrouped$NSDateComponents$weekday, (IMP*)&_logos_orig$_ungrouped$NSDateComponents$weekday);}Class _logos_class$_ungrouped$NSDateFormatter = objc_getClass("NSDateFormatter"); { MSHookMessageEx(_logos_class$_ungrouped$NSDateFormatter, @selector(stringFromDate:), (IMP)&_logos_method$_ungrouped$NSDateFormatter$stringFromDate$, (IMP*)&_logos_orig$_ungrouped$NSDateFormatter$stringFromDate$);}} }
-#line 147 "Tweak.x"
+#line 151 "Tweak.x"

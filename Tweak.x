@@ -1,13 +1,17 @@
 
 //NSDateComponents* components = [cal components:NSCalendarUnitMonth|NSCalendarUnitDay|NSCalendarUnitHour|NSCalendarUnitMinute|NSWeekdayCalendarUnit fromDate:date];
 
-
+ 
 
 
 #define PLIST_PATH @"/var/mobile/Library/Preferences/com.wrp1002.truedateprefs.plist"
 
 bool GetPrefsBool(NSString *key) {
 	return [[[NSDictionary dictionaryWithContentsOfFile:PLIST_PATH] valueForKey:key] boolValue];
+}
+
+int GetPrefsInt(NSString *key) {
+	return [[[NSDictionary dictionaryWithContentsOfFile:PLIST_PATH] valueForKey:key] integerValue];
 }
 
 //	Time where the day will change to the "correct" day
@@ -88,9 +92,9 @@ void ShowAlert(NSString *msg) {
 		//long min = [components minute];
 
 		bool active = GetPrefsBool(@"kActive");
-		
+		int time = GetPrefsInt(@"kTime");
 
-		NSString *msg = [NSString stringWithFormat:@"Weekday:%ld  Hour:%ld  Active: %s", weekday, (long)hour, active ? "true" : "false"];
+		NSString *msg = [NSString stringWithFormat:@"Weekday:%ld  Hour:%ld  Active: %s  Time:%ld", weekday, (long)hour, active ? "true" : "false", time];
 
 		ShowAlert(msg);
 	}
