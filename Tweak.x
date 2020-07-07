@@ -79,20 +79,12 @@ void ShowAlert(NSString *msg) {
 
 		#pragma clang diagnostic push
 		#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-		
-		//NSDate *date = [NSDate date];
-		//NSCalendar *cal = [NSCalendar currentCalendar];
-		//NSDateComponents* components = [cal components:NSCalendarUnitMonth|NSCalendarUnitDay|NSCalendarUnitHour|NSCalendarUnitMinute|NSWeekdayCalendarUnit fromDate:date];
-
-		//long day = [components day];
-		long weekday = GetWeekday();
-		long hour = GetHour();
-		//long min = [components minute];
+	
 
 		bool active = GetPrefsBool(@"kActive");
-		int time = GetPrefsInt(@"kTime");
+		rolloverHour = GetPrefsInt(@"kTime");
 
-		NSString *msg = [NSString stringWithFormat:@"Weekday:%ld  Hour:%ld  Active: %s  Time:%ld", weekday, (long)hour, active ? "true" : "false", time];
+		NSString *msg = [NSString stringWithFormat:@"Active: %s  Time:%i", active ? "true" : "false", rolloverHour];
 
 		ShowAlert(msg);
 	}

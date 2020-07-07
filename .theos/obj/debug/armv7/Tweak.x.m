@@ -2,8 +2,6 @@
 
 
 
- 
-
 
 #define PLIST_PATH @"/var/mobile/Library/Preferences/com.wrp1002.truedateprefs.plist"
 
@@ -96,10 +94,10 @@ void ShowAlert(NSString *msg) {
 #define _LOGOS_RETURN_RETAINED
 #endif
 
-@class NSDateFormatter; @class SpringBoard; @class NSDateComponents; 
+@class NSDateFormatter; @class NSDateComponents; @class SpringBoard; 
 static void (*_logos_orig$_ungrouped$SpringBoard$applicationDidFinishLaunching$)(_LOGOS_SELF_TYPE_NORMAL SpringBoard* _LOGOS_SELF_CONST, SEL, id); static void _logos_method$_ungrouped$SpringBoard$applicationDidFinishLaunching$(_LOGOS_SELF_TYPE_NORMAL SpringBoard* _LOGOS_SELF_CONST, SEL, id); static long long (*_logos_orig$_ungrouped$NSDateComponents$weekday)(_LOGOS_SELF_TYPE_NORMAL NSDateComponents* _LOGOS_SELF_CONST, SEL); static long long _logos_method$_ungrouped$NSDateComponents$weekday(_LOGOS_SELF_TYPE_NORMAL NSDateComponents* _LOGOS_SELF_CONST, SEL); static id (*_logos_orig$_ungrouped$NSDateFormatter$stringFromDate$)(_LOGOS_SELF_TYPE_NORMAL NSDateFormatter* _LOGOS_SELF_CONST, SEL, id); static id _logos_method$_ungrouped$NSDateFormatter$stringFromDate$(_LOGOS_SELF_TYPE_NORMAL NSDateFormatter* _LOGOS_SELF_CONST, SEL, id); 
 
-#line 77 "Tweak.x"
+#line 75 "Tweak.x"
 
 
 	static void _logos_method$_ungrouped$SpringBoard$applicationDidFinishLaunching$(_LOGOS_SELF_TYPE_NORMAL SpringBoard* _LOGOS_SELF_CONST __unused self, SEL __unused _cmd, id application) {
@@ -107,20 +105,12 @@ static void (*_logos_orig$_ungrouped$SpringBoard$applicationDidFinishLaunching$)
 
 		#pragma clang diagnostic push
 		#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-		
-		
-		
-		
-
-		
-		long weekday = GetWeekday();
-		long hour = GetHour();
-		
+	
 
 		bool active = GetPrefsBool(@"kActive");
-		int time = GetPrefsInt(@"kTime");
+		rolloverHour = GetPrefsInt(@"kTime");
 
-		NSString *msg = [NSString stringWithFormat:@"Weekday:%ld  Hour:%ld  Active: %s  Time:%ld", weekday, (long)hour, active ? "true" : "false", time];
+		NSString *msg = [NSString stringWithFormat:@"Active: %s  Time:%i", active ? "true" : "false", rolloverHour];
 
 		ShowAlert(msg);
 	}
@@ -176,4 +166,4 @@ static void (*_logos_orig$_ungrouped$SpringBoard$applicationDidFinishLaunching$)
 
 static __attribute__((constructor)) void _logosLocalInit() {
 {Class _logos_class$_ungrouped$SpringBoard = objc_getClass("SpringBoard"); { MSHookMessageEx(_logos_class$_ungrouped$SpringBoard, @selector(applicationDidFinishLaunching:), (IMP)&_logos_method$_ungrouped$SpringBoard$applicationDidFinishLaunching$, (IMP*)&_logos_orig$_ungrouped$SpringBoard$applicationDidFinishLaunching$);}Class _logos_class$_ungrouped$NSDateComponents = objc_getClass("NSDateComponents"); { MSHookMessageEx(_logos_class$_ungrouped$NSDateComponents, @selector(weekday), (IMP)&_logos_method$_ungrouped$NSDateComponents$weekday, (IMP*)&_logos_orig$_ungrouped$NSDateComponents$weekday);}Class _logos_class$_ungrouped$NSDateFormatter = objc_getClass("NSDateFormatter"); { MSHookMessageEx(_logos_class$_ungrouped$NSDateFormatter, @selector(stringFromDate:), (IMP)&_logos_method$_ungrouped$NSDateFormatter$stringFromDate$, (IMP*)&_logos_orig$_ungrouped$NSDateFormatter$stringFromDate$);}} }
-#line 151 "Tweak.x"
+#line 141 "Tweak.x"
