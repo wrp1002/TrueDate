@@ -3,7 +3,6 @@
 
 
 
-
 #define PLIST_PATH @"/var/mobile/Library/Preferences/com.wrp1002.truedateprefs.plist"
 
 bool GetPrefsBool(NSString *key) {
