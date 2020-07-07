@@ -1,8 +1,20 @@
 
 //NSDateComponents* components = [cal components:NSCalendarUnitMonth|NSCalendarUnitDay|NSCalendarUnitHour|NSCalendarUnitMinute|NSWeekdayCalendarUnit fromDate:date];
 
+
+
+
+#define PLIST_PATH @"/var/mobile/Library/Preferences/com.wrp1002.truedateprefs.plist"
+
+bool GetPrefsBool(NSString *key) {
+	return [[[NSDictionary dictionaryWithContentsOfFile:PLIST_PATH] valueForKey:key] boolValue];
+}
+
 //	Time where the day will change to the "correct" day
-NSInteger rolloverHour = 6;
+int rolloverHour = 5;
+int rolloverMinute = 0;
+
+
 
 long GetHour() {
 	NSDate *date = [NSDate date];
@@ -14,14 +26,22 @@ long GetHour() {
 	return hour;
 }
 
+long GetMinute() {
+	NSDate *date = [NSDate date];
+	NSCalendar *cal = [NSCalendar currentCalendar];
+	NSDateComponents* components = [cal components:NSCalendarUnitMinute fromDate:date];
+
+	long minute = [components minute];
+
+	return minute;
+}
+
 long GetWeekday() {
 	NSDate *date = [NSDate date];
 	NSCalendar *cal = [NSCalendar currentCalendar];
 	NSDateComponents* components = [cal components:NSWeekdayCalendarUnit fromDate:date];
 
 	long weekday = [components weekday];
-
-	weekday--;
 
 	return weekday;
 }
@@ -37,7 +57,7 @@ long GetDay() {
 }
 
 bool ShouldRollover() {
-	return (GetHour() > rolloverHour);
+	return (GetHour() >= rolloverHour && GetMinute() >= rolloverMinute);
 }
 
 void ShowAlert(NSString *msg) {
@@ -50,7 +70,7 @@ void ShowAlert(NSString *msg) {
 }
 
 
-/*%hook SpringBoard
+%hook SpringBoard
 
 	-(void)applicationDidFinishLaunching:(id)application {
 		%orig;
@@ -67,19 +87,22 @@ void ShowAlert(NSString *msg) {
 		long hour = GetHour();
 		//long min = [components minute];
 
-		NSString *msg = [NSString stringWithFormat:@"Weekday:%ld  Hour:%ld", weekday, (long)hour];
+		bool active = GetPrefsBool(@"kActive");
+		
+
+		NSString *msg = [NSString stringWithFormat:@"Weekday:%ld  Hour:%ld  Active: %s", weekday, (long)hour, active ? "true" : "false"];
 
 		ShowAlert(msg);
 	}
 
-%end*/
+%end
 
 %hook NSDateComponents
 	-(long long)weekday {
 		long day = %orig();
 
 		if (!ShouldRollover()) {
-			day -= 1;
+			day--;
 			if (day < 0)
 				day += 7;
 		}
@@ -91,7 +114,7 @@ void ShowAlert(NSString *msg) {
 %hook NSDateFormatter
 
 	-(id)stringFromDate:(id)arg1 {
-		long weekdayNum = GetWeekday();
+		long weekdayNum = GetWeekday() - 1;
 		
 		NSString *format = [self dateFormat];
 		[self setDateFormat:[format stringByReplacingOccurrencesOfString:@"E" withString:@"$"]];
@@ -99,7 +122,20 @@ void ShowAlert(NSString *msg) {
 		NSString *formattedDate = %orig(arg1);
 		[self setDateFormat:format];
 
-		NSString *weekday = [self shortWeekdaySymbols][weekdayNum];
+		int weekdayLength  = 0;
+		for (int i = 0; i < formattedDate.length; i++) {
+			if ([formattedDate characterAtIndex:i] == '$')
+				weekdayLength++;
+		}
+
+		NSString *weekday;
+
+		//if (weekdayLength <= 2)
+		//	weekday = [self veryShortWeekdaySymbols][weekdayNum];
+		if (weekdayLength <= 3)
+			weekday = [self shortWeekdaySymbols][weekdayNum];
+		else
+			weekday = [self weekdaySymbols][weekdayNum];
 
 		NSString *result = [formattedDate stringByReplacingOccurrencesOfString:@"$" withString:weekday];
 
@@ -107,3 +143,4 @@ void ShowAlert(NSString *msg) {
 	}
 
 %end
+

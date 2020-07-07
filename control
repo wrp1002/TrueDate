@@ -1,9 +1,9 @@
-Package: com.yourcompany.test1
-Name: test1
+Package: wrp1002
+Name: truedate
 Version: 0.0.1
 Architecture: iphoneos-arm
 Description: An awesome MobileSubstrate tweak!
 Maintainer: Wes
 Author: Wes
 Section: Tweaks
-Depends: mobilesubstrate (>= 0.9.5000), preferenceloader (>= 2.2.3)
+Depends: mobilesubstrate (>= 0.9.5000)
