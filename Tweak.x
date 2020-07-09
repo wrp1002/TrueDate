@@ -14,17 +14,21 @@
 //	Tweak enabled
 bool enabled = false;
 
-
+//	Enables hooking into function that calendar icon uses. May cause changes elsewhere too
 bool calendarEnabled = false;
 
-
-bool lockEnabled = false;
+//	Enables hooking into function that returns string of formatted date. Causes changes on lock screen, notification center, status bar clock, etc
+bool dateEnabled = false;
 
 //	Time where the day will change to the "correct" day
 int rolloverHour = 0;
 
+
 bool springboardReady = false;
 
+
+
+//	Old code used to retrieve values from preferences. Respring needed
 /*
 bool GetPrefsBool(NSString *key) {
 	return [[[NSDictionary dictionaryWithContentsOfFile:kSettingsPath] valueForKey:key] boolValue];
@@ -37,9 +41,7 @@ int GetPrefsInt(NSString *key) {
 
 
 
-
-
-
+//	Returns current hour in 24hr time
 long GetHour() {
 	NSDate *date = [NSDate date];
 	NSCalendar *cal = [NSCalendar currentCalendar];
@@ -50,6 +52,7 @@ long GetHour() {
 	return hour;
 }
 
+//	Returns current minute
 long GetMinute() {
 	NSDate *date = [NSDate date];
 	NSCalendar *cal = [NSCalendar currentCalendar];
@@ -60,6 +63,7 @@ long GetMinute() {
 	return minute;
 }
 
+//	Returns current weekday 0-6 starting with Sunday
 long GetWeekday() {
 	NSDate *date = [NSDate date];
 	NSCalendar *cal = [NSCalendar currentCalendar];
@@ -70,6 +74,7 @@ long GetWeekday() {
 	return weekday;
 }
 
+//	Returns current day of month
 long GetDay() {
 	NSDate *date = [NSDate date];
 	NSCalendar *cal = [NSCalendar currentCalendar];
@@ -80,11 +85,12 @@ long GetDay() {
 	return day;
 }
 
+//	Used to determine if the date should stay the same after specified time
 bool ShouldRollover() {
-	return false;
-	return (GetHour() >= rolloverHour && GetMinute() >= rolloverMinute);
+	return (GetHour() >= rolloverHour);
 }
 
+//	Shows an alert box. Used for debugging
 void ShowAlert(NSString *msg) {
 	UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Alert"
 	message:msg
@@ -97,6 +103,7 @@ void ShowAlert(NSString *msg) {
 
 %hook SpringBoard
 
+	//	Called when springboard is finished launching
 	-(void)applicationDidFinishLaunching:(id)application {
 		%orig;
 
@@ -171,10 +178,9 @@ void ShowAlert(NSString *msg) {
 %end
 
 
-
+//	Called whenever any preferences are changed to update variables
 static void reloadPrefs() {
-	if (springboardReady)
-		ShowAlert(@"Prefs changed!");
+	//if (springboardReady) ShowAlert(@"Prefs changed!");
 
 	CFPreferencesAppSynchronize((CFStringRef)kIdentifier);
 
@@ -193,7 +199,7 @@ static void reloadPrefs() {
 
 	enabled = [prefs objectForKey:@"kEnabled"] ? [(NSNumber *)[prefs objectForKey:@"kEnabled"] boolValue] : enabled;
 	calendarEnabled = [prefs objectForKey:@"kCalendar"] ? [(NSNumber *)[prefs objectForKey:@"kCalendar"] boolValue] : calendarEnabled;
-	lockEnabled = [prefs objectForKey:@"kLockScreen"] ? [(NSNumber *)[prefs objectForKey:@"kLockScreen"] boolValue] : lockEnabled;
+	dateEnabled = [prefs objectForKey:@"kLockScreen"] ? [(NSNumber *)[prefs objectForKey:@"kLockScreen"] boolValue] : dateEnabled;
 	rolloverHour = [prefs objectForKey:@"kTime"] ? [(NSNumber *)[prefs objectForKey:@"kTime"] intValue] : rolloverHour;
 }
 
@@ -202,21 +208,3 @@ static void reloadPrefs() {
 	reloadPrefs();
 	CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, (CFNotificationCallback)reloadPrefs, kSettingsChangedNotification, NULL, CFNotificationSuspensionBehaviorDeliverImmediately);
 }
-
-/*void ReloadPrefs() {
-    ShowAlert(@"Prefs changed!");
-  }
-
-%ctor {
-	CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, (CFNotificationCallback)ReloadPrefs, kSettingsChangedNotification, NULL, CFNotificationSuspensionBehaviorDeliverImmediately);
-	HBPreferences *preferences = [[HBPreferences alloc] initWithIdentifier:@"com.wrp1002.truedate"];
-
-	[preferences registerBool:&enabled default:NO forKey:@"kEnabled"];
-	[preferences registerBool:&calendarEnabled default:NO forKey:@"kCalendar"];
-	[preferences registerBool:&lockEnabled default:NO forKey:@"kLockScreen"];
-	[preferences registerInteger:&rolloverHour default:0 forKey:@"kTime"];
-
-	[preferences registerPreferenceChangeBlock:^{
-		ReloadPrefs();
-	}];
-}*/
