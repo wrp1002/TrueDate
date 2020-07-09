@@ -1,11 +1,11 @@
-/home/wes/Documents/projects/truedate/.theos/obj/debug/armv7/Tweak.x.597b6aec.o: \
+/home/wes/Documents/projects/truedate/.theos/obj/debug/armv7/Tweak.x.ca2cd073.o: \
   /home/wes/Documents/projects/truedate/.theos/obj/debug/armv7/Tweak.x.m \
   /home/wes/theos/Prefix.pch \
   /home/wes/theos/vendor/include/theos/BackwardsCompat.h \
   /home/wes/theos/vendor/include/theos/IOSMacros.h \
   /home/wes/theos/vendor/include/HBLog.h \
   /home/wes/theos/vendor/include/CoreFoundation/CFLogUtilities.h \
-  /home/wes/Documents/projects/truedate/HBPreferences.h \
+  /home/wes/theos/vendor/lib/Cephei.framework/Headers/HBPreferences.h \
   /home/wes/theos/vendor/include/substrate.h
 
 /home/wes/theos/Prefix.pch:
@@ -18,6 +18,6 @@
 
 /home/wes/theos/vendor/include/CoreFoundation/CFLogUtilities.h:
 
-/home/wes/Documents/projects/truedate/HBPreferences.h:
+/home/wes/theos/vendor/lib/Cephei.framework/Headers/HBPreferences.h:
 
 /home/wes/theos/vendor/include/substrate.h:

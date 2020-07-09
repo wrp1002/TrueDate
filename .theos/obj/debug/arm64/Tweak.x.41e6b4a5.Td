@@ -5,6 +5,7 @@
   /home/wes/theos/vendor/include/theos/IOSMacros.h \
   /home/wes/theos/vendor/include/HBLog.h \
   /home/wes/theos/vendor/include/CoreFoundation/CFLogUtilities.h \
+  /home/wes/Documents/projects/truedate/HBPreferences.h \
   /home/wes/theos/vendor/include/substrate.h
 
 /home/wes/theos/Prefix.pch:
@@ -16,5 +17,7 @@
 /home/wes/theos/vendor/include/HBLog.h:
 
 /home/wes/theos/vendor/include/CoreFoundation/CFLogUtilities.h:
+
+/home/wes/Documents/projects/truedate/HBPreferences.h:
 
 /home/wes/theos/vendor/include/substrate.h:

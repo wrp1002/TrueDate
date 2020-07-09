@@ -7,11 +7,12 @@ INSTALL_TARGET_PROCESSES = SpringBoard
 
 include $(THEOS)/makefiles/common.mk
 
-TWEAK_NAME = truedate
+TWEAK_NAME = TrueDate
 
-truedate_FILES = Tweak.x
-truedate_CFLAGS = -fobjc-arc
+TrueDate_FILES = Tweak.x
+TrueDate_CFLAGS = -fobjc-arc
+TrueDate_EXTRA_FRAMEWORKS += Cephei
 
 include $(THEOS_MAKE_PATH)/tweak.mk
-SUBPROJECTS += truedateprefs
+SUBPROJECTS += TrueDatePrefs
 include $(THEOS_MAKE_PATH)/aggregate.mk

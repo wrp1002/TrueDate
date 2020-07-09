@@ -1,9 +1,9 @@
-Package: wrp1002
-Name: truedate
+Package: com.wrp1002.truedate
+Name: TrueDate
 Version: 0.0.1
 Architecture: iphoneos-arm
 Description: An awesome MobileSubstrate tweak!
 Maintainer: Wes
 Author: Wes
 Section: Tweaks
-Depends: mobilesubstrate (>= 0.9.5000)
+Depends: mobilesubstrate (>= 0.9.5000), ws.hbang.common (>= 1.2)
