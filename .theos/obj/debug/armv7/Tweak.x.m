@@ -76,6 +76,22 @@ long GetWeekday() {
 }
 
 
+long GetPreviousWeekday() {
+	NSDate *now = [NSDate date];
+	NSDate *date = [now dateByAddingTimeInterval:-24*60*60];
+
+	if (calendarEnabled)
+		date = now;
+
+	NSCalendar *cal = [NSCalendar currentCalendar];
+	NSDateComponents* components = [cal components:NSWeekdayCalendarUnit fromDate:date];
+
+	long weekday = [components weekday];
+
+	return weekday;
+}
+
+
 long GetDay() {
 	NSDate *date = [NSDate date];
 	NSCalendar *cal = [NSCalendar currentCalendar];
@@ -87,7 +103,21 @@ long GetDay() {
 }
 
 
+long GetPreviousDay() {
+	NSDate *now = [NSDate date];
+	NSDate *date = [now dateByAddingTimeInterval:-24*60*60];
+
+	NSCalendar *cal = [NSCalendar currentCalendar];
+	NSDateComponents* components = [cal components:NSDayCalendarUnit fromDate:date];
+
+	long day = [components day];
+
+	return day;
+}
+
+
 bool ShouldRollover() {
+	return false;
 	return (GetHour() >= rolloverHour);
 }
 
@@ -99,6 +129,19 @@ void ShowAlert(NSString *msg) {
 	cancelButtonTitle:@"Cool!"
 	otherButtonTitles:nil];
 	[alert show];
+}
+
+NSString *ReplaceWithRegex(NSString *str, NSString *newStr, NSString *pattern) {
+	@try {
+		NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:pattern options:0 error:nil];
+		NSString *modifiedString = [regex stringByReplacingMatchesInString:str options:0 range:NSMakeRange(0, [str length]) withTemplate:newStr];
+
+		return modifiedString;
+	}
+
+	@catch ( NSException *e ) {
+		return str;
+	}
 }
 
 
@@ -123,10 +166,10 @@ void ShowAlert(NSString *msg) {
 #define _LOGOS_RETURN_RETAINED
 #endif
 
-@class SpringBoard; @class NSDateFormatter; @class NSDateComponents; 
+@class NSDateFormatter; @class NSDateComponents; @class SpringBoard; 
 static void (*_logos_orig$_ungrouped$SpringBoard$applicationDidFinishLaunching$)(_LOGOS_SELF_TYPE_NORMAL SpringBoard* _LOGOS_SELF_CONST, SEL, id); static void _logos_method$_ungrouped$SpringBoard$applicationDidFinishLaunching$(_LOGOS_SELF_TYPE_NORMAL SpringBoard* _LOGOS_SELF_CONST, SEL, id); static long long (*_logos_orig$_ungrouped$NSDateComponents$weekday)(_LOGOS_SELF_TYPE_NORMAL NSDateComponents* _LOGOS_SELF_CONST, SEL); static long long _logos_method$_ungrouped$NSDateComponents$weekday(_LOGOS_SELF_TYPE_NORMAL NSDateComponents* _LOGOS_SELF_CONST, SEL); static id (*_logos_orig$_ungrouped$NSDateFormatter$stringFromDate$)(_LOGOS_SELF_TYPE_NORMAL NSDateFormatter* _LOGOS_SELF_CONST, SEL, id); static id _logos_method$_ungrouped$NSDateFormatter$stringFromDate$(_LOGOS_SELF_TYPE_NORMAL NSDateFormatter* _LOGOS_SELF_CONST, SEL, id); 
 
-#line 104 "Tweak.x"
+#line 147 "Tweak.x"
 
 
 	
@@ -149,33 +192,69 @@ static void (*_logos_orig$_ungrouped$SpringBoard$applicationDidFinishLaunching$)
 
 
 
-	static long long _logos_method$_ungrouped$NSDateComponents$weekday(_LOGOS_SELF_TYPE_NORMAL NSDateComponents* _LOGOS_SELF_CONST __unused self, SEL __unused _cmd) {
-		long day = _logos_orig$_ungrouped$NSDateComponents$weekday(self, _cmd);
 
-		if (!enabled)
-			return day;
+	static long long _logos_method$_ungrouped$NSDateComponents$weekday(_LOGOS_SELF_TYPE_NORMAL NSDateComponents* _LOGOS_SELF_CONST __unused self, SEL __unused _cmd) {
+		long weekday = _logos_orig$_ungrouped$NSDateComponents$weekday(self, _cmd);
+
+		if (!enabled || !calendarEnabled)
+			return weekday;
 
 		if (!ShouldRollover()) {
-			day--;
-			if (day < 0)
-				day += 7;
+			weekday--;
+			if (weekday < 1)
+				weekday += 7;
 		}
 
-		return day;
+		return weekday;
 	}
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 
 	static id _logos_method$_ungrouped$NSDateFormatter$stringFromDate$(_LOGOS_SELF_TYPE_NORMAL NSDateFormatter* _LOGOS_SELF_CONST __unused self, SEL __unused _cmd, id arg1) {
-		if (!enabled) {
+		if (!enabled || !dateEnabled) {
 			return _logos_orig$_ungrouped$NSDateFormatter$stringFromDate$(self, _cmd, arg1);
 		}
 
-		long weekdayNum = GetWeekday() - 1;
+		long weekdayIndex = (ShouldRollover() ? GetWeekday() : GetPreviousWeekday()) - 1;
+		long day = ShouldRollover() ? GetDay() : GetPreviousDay();
+
+		NSString *dayStr = [NSString stringWithFormat:@"%li",day];
 		
 		NSString *format = [self dateFormat];
-		[self setDateFormat:[format stringByReplacingOccurrencesOfString:@"E" withString:@"$"]];
+		NSString *formatTmp = [format stringByReplacingOccurrencesOfString:@"E" withString:@"$"];
+		formatTmp = [formatTmp stringByReplacingOccurrencesOfString:@"d" withString:@"#"];
+		[self setDateFormat:formatTmp];
 
 		NSString *formattedDate = _logos_orig$_ungrouped$NSDateFormatter$stringFromDate$(self, _cmd, arg1);
 		[self setDateFormat:format];
@@ -189,13 +268,17 @@ static void (*_logos_orig$_ungrouped$SpringBoard$applicationDidFinishLaunching$)
 		NSString *weekday;
 
 		
-		
 		if (weekdayLength <= 3)
-			weekday = [self shortWeekdaySymbols][weekdayNum];
+			weekday = [self shortWeekdaySymbols][weekdayIndex];
 		else
-			weekday = [self weekdaySymbols][weekdayNum];
+			weekday = [self weekdaySymbols][weekdayIndex];
 
-		NSString *result = [formattedDate stringByReplacingOccurrencesOfString:@"$" withString:weekday];
+
+		
+		
+
+		NSString *result = ReplaceWithRegex(formattedDate, weekday, @"\\$+");
+		result = ReplaceWithRegex(result, dayStr, @"#+");
 
 		return result;
 	}
@@ -229,10 +312,10 @@ static void reloadPrefs() {
 }
 
 
-static __attribute__((constructor)) void _logosLocalCtor_901ed790(int __unused argc, char __unused **argv, char __unused **envp) {
+static __attribute__((constructor)) void _logosLocalCtor_cdf9af0b(int __unused argc, char __unused **argv, char __unused **envp) {
 	reloadPrefs();
 	CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, (CFNotificationCallback)reloadPrefs, kSettingsChangedNotification, NULL, CFNotificationSuspensionBehaviorDeliverImmediately);
 }
 static __attribute__((constructor)) void _logosLocalInit() {
 {Class _logos_class$_ungrouped$SpringBoard = objc_getClass("SpringBoard"); { MSHookMessageEx(_logos_class$_ungrouped$SpringBoard, @selector(applicationDidFinishLaunching:), (IMP)&_logos_method$_ungrouped$SpringBoard$applicationDidFinishLaunching$, (IMP*)&_logos_orig$_ungrouped$SpringBoard$applicationDidFinishLaunching$);}Class _logos_class$_ungrouped$NSDateComponents = objc_getClass("NSDateComponents"); { MSHookMessageEx(_logos_class$_ungrouped$NSDateComponents, @selector(weekday), (IMP)&_logos_method$_ungrouped$NSDateComponents$weekday, (IMP*)&_logos_orig$_ungrouped$NSDateComponents$weekday);}Class _logos_class$_ungrouped$NSDateFormatter = objc_getClass("NSDateFormatter"); { MSHookMessageEx(_logos_class$_ungrouped$NSDateFormatter, @selector(stringFromDate:), (IMP)&_logos_method$_ungrouped$NSDateFormatter$stringFromDate$, (IMP*)&_logos_orig$_ungrouped$NSDateFormatter$stringFromDate$);}} }
-#line 210 "Tweak.x"
+#line 293 "Tweak.x"

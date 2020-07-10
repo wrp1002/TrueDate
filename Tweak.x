@@ -63,9 +63,25 @@ long GetMinute() {
 	return minute;
 }
 
-//	Returns current weekday 0-6 starting with Sunday
+//	Returns current weekday 1-7 starting with Sunday
 long GetWeekday() {
 	NSDate *date = [NSDate date];
+	NSCalendar *cal = [NSCalendar currentCalendar];
+	NSDateComponents* components = [cal components:NSWeekdayCalendarUnit fromDate:date];
+
+	long weekday = [components weekday];
+
+	return weekday;
+}
+
+//	Returns previous weekday 1-7 starting with Sunday
+long GetPreviousWeekday() {
+	NSDate *now = [NSDate date];
+	NSDate *date = [now dateByAddingTimeInterval:-24*60*60];
+
+	if (calendarEnabled)
+		date = now;
+
 	NSCalendar *cal = [NSCalendar currentCalendar];
 	NSDateComponents* components = [cal components:NSWeekdayCalendarUnit fromDate:date];
 
@@ -85,8 +101,22 @@ long GetDay() {
 	return day;
 }
 
+//	Calculate and return the date from yesterday
+long GetPreviousDay() {
+	NSDate *now = [NSDate date];
+	NSDate *date = [now dateByAddingTimeInterval:-24*60*60];
+
+	NSCalendar *cal = [NSCalendar currentCalendar];
+	NSDateComponents* components = [cal components:NSDayCalendarUnit fromDate:date];
+
+	long day = [components day];
+
+	return day;
+}
+
 //	Used to determine if the date should stay the same after specified time
 bool ShouldRollover() {
+	return false;
 	return (GetHour() >= rolloverHour);
 }
 
@@ -98,6 +128,19 @@ void ShowAlert(NSString *msg) {
 	cancelButtonTitle:@"Cool!"
 	otherButtonTitles:nil];
 	[alert show];
+}
+
+NSString *ReplaceWithRegex(NSString *str, NSString *newStr, NSString *pattern) {
+	@try {
+		NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:pattern options:0 error:nil];
+		NSString *modifiedString = [regex stringByReplacingMatchesInString:str options:0 range:NSMakeRange(0, [str length]) withTemplate:newStr];
+
+		return modifiedString;
+	}
+
+	@catch ( NSException *e ) {
+		return str;
+	}
 }
 
 
@@ -122,34 +165,70 @@ void ShowAlert(NSString *msg) {
 
 %end
 
+
 %hook NSDateComponents
 	-(long long)weekday {
+		long weekday = %orig();
+
+		if (!enabled || !calendarEnabled)
+			return weekday;
+
+		if (!ShouldRollover()) {
+			weekday--;
+			if (weekday < 1)
+				weekday += 7;
+		}
+
+		return weekday;
+	}
+
+	/*-(long long)day {
 		long day = %orig();
 
-		if (!enabled)
+		if (!enabled || !calendarEnabled)
 			return day;
 
 		if (!ShouldRollover()) {
 			day--;
-			if (day < 0)
+			if (day < 1)
 				day += 7;
 		}
 
 		return day;
+	}*/
+%end
+
+
+/*
+%hook NSDate
+	+(id)date {
+		if (!enabled || !calendarEnabled)
+			return %orig();
+
+		NSDate *date = %orig();
+		NSDate *yesterday = [date dateByAddingTimeInterval:-24*60*60];
+
+		return yesterday;
 	}
 %end
+*/
 
 %hook NSDateFormatter
 
 	-(id)stringFromDate:(id)arg1 {
-		if (!enabled) {
+		if (!enabled || !dateEnabled) {
 			return %orig(arg1);
 		}
 
-		long weekdayNum = GetWeekday() - 1;
+		long weekdayIndex = (ShouldRollover() ? GetWeekday() : GetPreviousWeekday()) - 1;
+		long day = ShouldRollover() ? GetDay() : GetPreviousDay();
+
+		NSString *dayStr = [NSString stringWithFormat:@"%li",day];
 		
 		NSString *format = [self dateFormat];
-		[self setDateFormat:[format stringByReplacingOccurrencesOfString:@"E" withString:@"$"]];
+		NSString *formatTmp = [format stringByReplacingOccurrencesOfString:@"E" withString:@"$"];
+		formatTmp = [formatTmp stringByReplacingOccurrencesOfString:@"d" withString:@"#"];
+		[self setDateFormat:formatTmp];
 
 		NSString *formattedDate = %orig(arg1);
 		[self setDateFormat:format];
@@ -162,14 +241,18 @@ void ShowAlert(NSString *msg) {
 
 		NSString *weekday;
 
-		//if (weekdayLength <= 2)
-		//	weekday = [self veryShortWeekdaySymbols][weekdayNum];
+		//if (weekdayLength <= 2) weekday = [self veryShortWeekdaySymbols][weekdayNum];
 		if (weekdayLength <= 3)
-			weekday = [self shortWeekdaySymbols][weekdayNum];
+			weekday = [self shortWeekdaySymbols][weekdayIndex];
 		else
-			weekday = [self weekdaySymbols][weekdayNum];
+			weekday = [self weekdaySymbols][weekdayIndex];
 
-		NSString *result = [formattedDate stringByReplacingOccurrencesOfString:@"$" withString:weekday];
+
+		//NSString *result = [formattedDate stringByReplacingOccurrencesOfString:@"$" withString:weekday];
+		//result = [result stringByReplacingOccurrencesOfString:@"#" withString:dayStr];
+
+		NSString *result = ReplaceWithRegex(formattedDate, weekday, @"\\$+");
+		result = ReplaceWithRegex(result, dayStr, @"#+");
 
 		return result;
 	}
