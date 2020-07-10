@@ -14,8 +14,17 @@
 
 
 bool enabled = false;
+
+
 bool calendarEnabled = false;
-bool lockEnabled = false;
+
+
+bool dateEnabled = false;
+
+
+int rolloverHour = 0;
+
+
 bool springboardReady = false;
 
 
@@ -30,8 +39,7 @@ bool springboardReady = false;
 
 
 
-int rolloverHour = 0;
-int rolloverMinute = 0;
+
 
 
 
@@ -45,6 +53,7 @@ long GetHour() {
 	return hour;
 }
 
+
 long GetMinute() {
 	NSDate *date = [NSDate date];
 	NSCalendar *cal = [NSCalendar currentCalendar];
@@ -54,6 +63,7 @@ long GetMinute() {
 
 	return minute;
 }
+
 
 long GetWeekday() {
 	NSDate *date = [NSDate date];
@@ -65,6 +75,7 @@ long GetWeekday() {
 	return weekday;
 }
 
+
 long GetDay() {
 	NSDate *date = [NSDate date];
 	NSCalendar *cal = [NSCalendar currentCalendar];
@@ -75,10 +86,11 @@ long GetDay() {
 	return day;
 }
 
+
 bool ShouldRollover() {
-	return false;
-	return (GetHour() >= rolloverHour && GetMinute() >= rolloverMinute);
+	return (GetHour() >= rolloverHour);
 }
+
 
 void ShowAlert(NSString *msg) {
 	UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Alert"
@@ -111,12 +123,13 @@ void ShowAlert(NSString *msg) {
 #define _LOGOS_RETURN_RETAINED
 #endif
 
-@class NSDateFormatter; @class SpringBoard; @class NSDateComponents; 
+@class NSDateComponents; @class SpringBoard; @class NSDateFormatter; 
 static void (*_logos_orig$_ungrouped$SpringBoard$applicationDidFinishLaunching$)(_LOGOS_SELF_TYPE_NORMAL SpringBoard* _LOGOS_SELF_CONST, SEL, id); static void _logos_method$_ungrouped$SpringBoard$applicationDidFinishLaunching$(_LOGOS_SELF_TYPE_NORMAL SpringBoard* _LOGOS_SELF_CONST, SEL, id); static long long (*_logos_orig$_ungrouped$NSDateComponents$weekday)(_LOGOS_SELF_TYPE_NORMAL NSDateComponents* _LOGOS_SELF_CONST, SEL); static long long _logos_method$_ungrouped$NSDateComponents$weekday(_LOGOS_SELF_TYPE_NORMAL NSDateComponents* _LOGOS_SELF_CONST, SEL); static id (*_logos_orig$_ungrouped$NSDateFormatter$stringFromDate$)(_LOGOS_SELF_TYPE_NORMAL NSDateFormatter* _LOGOS_SELF_CONST, SEL, id); static id _logos_method$_ungrouped$NSDateFormatter$stringFromDate$(_LOGOS_SELF_TYPE_NORMAL NSDateFormatter* _LOGOS_SELF_CONST, SEL, id); 
 
-#line 92 "Tweak.x"
+#line 104 "Tweak.x"
 
 
+	
 	static void _logos_method$_ungrouped$SpringBoard$applicationDidFinishLaunching$(_LOGOS_SELF_TYPE_NORMAL SpringBoard* _LOGOS_SELF_CONST __unused self, SEL __unused _cmd, id application) {
 		_logos_orig$_ungrouped$SpringBoard$applicationDidFinishLaunching$(self, _cmd, application);
 
@@ -128,9 +141,8 @@ static void (*_logos_orig$_ungrouped$SpringBoard$applicationDidFinishLaunching$)
 		
 		springboardReady = true;
 
-		NSString *msg = [NSString stringWithFormat:@"Active: %s  Time:%i", enabled ? "true" : "false", rolloverHour];
-
-		ShowAlert(msg);
+		
+		
 		
 	}
 
@@ -193,8 +205,7 @@ static void (*_logos_orig$_ungrouped$SpringBoard$applicationDidFinishLaunching$)
 
 
 static void reloadPrefs() {
-	if (springboardReady)
-		ShowAlert(@"Prefs changed!");
+	
 
 	CFPreferencesAppSynchronize((CFStringRef)kIdentifier);
 
@@ -213,33 +224,15 @@ static void reloadPrefs() {
 
 	enabled = [prefs objectForKey:@"kEnabled"] ? [(NSNumber *)[prefs objectForKey:@"kEnabled"] boolValue] : enabled;
 	calendarEnabled = [prefs objectForKey:@"kCalendar"] ? [(NSNumber *)[prefs objectForKey:@"kCalendar"] boolValue] : calendarEnabled;
-	lockEnabled = [prefs objectForKey:@"kLockScreen"] ? [(NSNumber *)[prefs objectForKey:@"kLockScreen"] boolValue] : lockEnabled;
+	dateEnabled = [prefs objectForKey:@"kLockScreen"] ? [(NSNumber *)[prefs objectForKey:@"kLockScreen"] boolValue] : dateEnabled;
 	rolloverHour = [prefs objectForKey:@"kTime"] ? [(NSNumber *)[prefs objectForKey:@"kTime"] intValue] : rolloverHour;
 }
 
 
-static __attribute__((constructor)) void _logosLocalCtor_94c3f9ba(int __unused argc, char __unused **argv, char __unused **envp) {
+static __attribute__((constructor)) void _logosLocalCtor_901ed790(int __unused argc, char __unused **argv, char __unused **envp) {
 	reloadPrefs();
 	CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, (CFNotificationCallback)reloadPrefs, kSettingsChangedNotification, NULL, CFNotificationSuspensionBehaviorDeliverImmediately);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 static __attribute__((constructor)) void _logosLocalInit() {
 {Class _logos_class$_ungrouped$SpringBoard = objc_getClass("SpringBoard"); { MSHookMessageEx(_logos_class$_ungrouped$SpringBoard, @selector(applicationDidFinishLaunching:), (IMP)&_logos_method$_ungrouped$SpringBoard$applicationDidFinishLaunching$, (IMP*)&_logos_orig$_ungrouped$SpringBoard$applicationDidFinishLaunching$);}Class _logos_class$_ungrouped$NSDateComponents = objc_getClass("NSDateComponents"); { MSHookMessageEx(_logos_class$_ungrouped$NSDateComponents, @selector(weekday), (IMP)&_logos_method$_ungrouped$NSDateComponents$weekday, (IMP*)&_logos_orig$_ungrouped$NSDateComponents$weekday);}Class _logos_class$_ungrouped$NSDateFormatter = objc_getClass("NSDateFormatter"); { MSHookMessageEx(_logos_class$_ungrouped$NSDateFormatter, @selector(stringFromDate:), (IMP)&_logos_method$_ungrouped$NSDateFormatter$stringFromDate$, (IMP*)&_logos_orig$_ungrouped$NSDateFormatter$stringFromDate$);}} }
-#line 217 "Tweak.x"
+#line 210 "Tweak.x"

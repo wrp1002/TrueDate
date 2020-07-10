@@ -4,7 +4,7 @@ include $(THEOS)/makefiles/common.mk
 
 BUNDLE_NAME = TrueDatePrefs
 
-TrueDatePrefs_FILES = XXXRootListController.m
+TrueDatePrefs_FILES = TRDRootListController.m
 TrueDatePrefs_FRAMEWORKS = UIKit
 TrueDatePrefs_PRIVATE_FRAMEWORKS = Preferences
 TrueDatePrefs_INSTALL_PATH = /Library/PreferenceBundles

@@ -10,6 +10,7 @@
 			<key>label</key>
 			<string>TrueDate Preferences</string>
 		</dict>
+
 		<dict>
 			<key>label</key>
 			<string>Enable</string>
@@ -27,10 +28,17 @@
 		</dict>
 
 		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>footerText</key>
+			<string>Enables hooking into function that calendar icon uses. May cause changes elsewhere too</string>
+		</dict>
+		<dict>
 			<key>label</key>
 			<string>Calendar</string>
 			<key>key</key>
 			<string>kCalendar</string>
+			
 			
 			<key>cell</key>
 			<string>PSSwitchCell</string>
@@ -43,8 +51,14 @@
 		</dict>
 
 		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>footerText</key>
+			<string>Enables hooking into the function that is used to format the date. Causes changes on lock screen, notification center, status bar time, etc</string>
+		</dict>
+		<dict>
 			<key>label</key>
-			<string>Lock screen date</string>
+			<string>System-wide Date</string>
 			<key>key</key>
 			<string>kLockScreen</string>
 
@@ -58,6 +72,12 @@
 			<string>com.wrp1002.truedate/ReloadPrefs</string>
 		</dict>
 
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>footerText</key>
+			<string>Time whenever date should rollover (24hr time)</string>
+		</dict>
 		<dict>
 			<key>label</key>
 			<string>Rollover Time</string>
@@ -80,19 +100,45 @@
 
 			<key>PostNotification</key>
 			<string>com.wrp1002.truedate/ReloadPrefs</string>
-
 		</dict>
 
+
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>footerText</key>
+			<string>Respringing is not needed for changes to take effect</string>
+		</dict>
 		<dict>
 			<key>cell</key>
 			<string>PSButtonCell</string>
 			<key>label</key>
-			<string>Respring</string>
+			<string>Respring...</string>
 			<key>action</key>
 			<string>respring</string>
 		</dict>
+
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>label</key>
+			<string>GitHub Page</string>
+			<key>action</key>
+			<string>openGithub</string>
+		</dict>
+
 	</array>
+
 	<key>title</key>
-	<string>truedateprefs</string>
+	<string>TrueDate</string>
+
 </dict>
 </plist>

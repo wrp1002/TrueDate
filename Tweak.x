@@ -115,9 +115,8 @@ void ShowAlert(NSString *msg) {
 		//rolloverHour = GetPrefsInt(@"kTime");
 		springboardReady = true;
 
-		NSString *msg = [NSString stringWithFormat:@"Active: %s  Time:%i", enabled ? "true" : "false", rolloverHour];
-
-		ShowAlert(msg);
+		//NSString *msg = [NSString stringWithFormat:@"Active: %s  Time:%i", enabled ? "true" : "false", rolloverHour];
+		//ShowAlert(msg);
 		
 	}
 
