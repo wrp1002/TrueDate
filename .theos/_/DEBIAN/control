@@ -6,5 +6,5 @@ Maintainer: Wes
 Author: Wes
 Section: Tweaks
 Depends: mobilesubstrate (>= 0.9.5000), ws.hbang.common (>= 1.2)
-Version: 0.0.1-107+debug
+Version: 0.0.1-108+debug
 Installed-Size: 15832
