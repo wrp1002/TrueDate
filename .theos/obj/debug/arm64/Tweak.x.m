@@ -13,21 +13,21 @@
 #define kSettingsPath @"/var/mobile/Library/Preferences/com.wrp1002.truedate.plist"
 
 
-bool enabled = false;
+bool enabled = true;
 
 
 bool calendarEnabled = false;
 
 
-bool dateEnabled = false;
+bool dateEnabled = true;
 
 
 int rolloverHour = 0;
 
 
+bool debugMode = false;
+
 bool springboardReady = false;
-
-
 
 
 
@@ -117,7 +117,6 @@ long GetPreviousDay() {
 
 
 bool ShouldRollover() {
-	return false;
 	return (GetHour() >= rolloverHour);
 }
 
@@ -166,10 +165,10 @@ NSString *ReplaceWithRegex(NSString *str, NSString *newStr, NSString *pattern) {
 #define _LOGOS_RETURN_RETAINED
 #endif
 
-@class NSDateComponents; @class SpringBoard; @class NSDateFormatter; 
+@class NSDateFormatter; @class SpringBoard; @class NSDateComponents; 
 static void (*_logos_orig$_ungrouped$SpringBoard$applicationDidFinishLaunching$)(_LOGOS_SELF_TYPE_NORMAL SpringBoard* _LOGOS_SELF_CONST, SEL, id); static void _logos_method$_ungrouped$SpringBoard$applicationDidFinishLaunching$(_LOGOS_SELF_TYPE_NORMAL SpringBoard* _LOGOS_SELF_CONST, SEL, id); static long long (*_logos_orig$_ungrouped$NSDateComponents$weekday)(_LOGOS_SELF_TYPE_NORMAL NSDateComponents* _LOGOS_SELF_CONST, SEL); static long long _logos_method$_ungrouped$NSDateComponents$weekday(_LOGOS_SELF_TYPE_NORMAL NSDateComponents* _LOGOS_SELF_CONST, SEL); static id (*_logos_orig$_ungrouped$NSDateFormatter$stringFromDate$)(_LOGOS_SELF_TYPE_NORMAL NSDateFormatter* _LOGOS_SELF_CONST, SEL, id); static id _logos_method$_ungrouped$NSDateFormatter$stringFromDate$(_LOGOS_SELF_TYPE_NORMAL NSDateFormatter* _LOGOS_SELF_CONST, SEL, id); 
 
-#line 147 "Tweak.x"
+#line 146 "Tweak.x"
 
 
 	
@@ -252,6 +251,10 @@ static void (*_logos_orig$_ungrouped$SpringBoard$applicationDidFinishLaunching$)
 		NSString *dayStr = [NSString stringWithFormat:@"%li",day];
 		
 		NSString *format = [self dateFormat];
+		if (debugMode)
+			return format;
+
+
 		NSString *formatTmp = [format stringByReplacingOccurrencesOfString:@"E" withString:@"$"];
 		formatTmp = [formatTmp stringByReplacingOccurrencesOfString:@"d" withString:@"#"];
 		[self setDateFormat:formatTmp];
@@ -309,13 +312,14 @@ static void reloadPrefs() {
 	calendarEnabled = [prefs objectForKey:@"kCalendar"] ? [(NSNumber *)[prefs objectForKey:@"kCalendar"] boolValue] : calendarEnabled;
 	dateEnabled = [prefs objectForKey:@"kLockScreen"] ? [(NSNumber *)[prefs objectForKey:@"kLockScreen"] boolValue] : dateEnabled;
 	rolloverHour = [prefs objectForKey:@"kTime"] ? [(NSNumber *)[prefs objectForKey:@"kTime"] intValue] : rolloverHour;
+	debugMode = [prefs objectForKey:@"kDebug"] ? [(NSNumber *)[prefs objectForKey:@"kDebug"] boolValue] : debugMode;
 }
 
 
-static __attribute__((constructor)) void _logosLocalCtor_cdf9af0b(int __unused argc, char __unused **argv, char __unused **envp) {
+static __attribute__((constructor)) void _logosLocalCtor_a6d5bc98(int __unused argc, char __unused **argv, char __unused **envp) {
 	reloadPrefs();
 	CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, (CFNotificationCallback)reloadPrefs, kSettingsChangedNotification, NULL, CFNotificationSuspensionBehaviorDeliverImmediately);
 }
 static __attribute__((constructor)) void _logosLocalInit() {
 {Class _logos_class$_ungrouped$SpringBoard = objc_getClass("SpringBoard"); { MSHookMessageEx(_logos_class$_ungrouped$SpringBoard, @selector(applicationDidFinishLaunching:), (IMP)&_logos_method$_ungrouped$SpringBoard$applicationDidFinishLaunching$, (IMP*)&_logos_orig$_ungrouped$SpringBoard$applicationDidFinishLaunching$);}Class _logos_class$_ungrouped$NSDateComponents = objc_getClass("NSDateComponents"); { MSHookMessageEx(_logos_class$_ungrouped$NSDateComponents, @selector(weekday), (IMP)&_logos_method$_ungrouped$NSDateComponents$weekday, (IMP*)&_logos_orig$_ungrouped$NSDateComponents$weekday);}Class _logos_class$_ungrouped$NSDateFormatter = objc_getClass("NSDateFormatter"); { MSHookMessageEx(_logos_class$_ungrouped$NSDateFormatter, @selector(stringFromDate:), (IMP)&_logos_method$_ungrouped$NSDateFormatter$stringFromDate$, (IMP*)&_logos_orig$_ungrouped$NSDateFormatter$stringFromDate$);}} }
-#line 293 "Tweak.x"
+#line 297 "Tweak.x"

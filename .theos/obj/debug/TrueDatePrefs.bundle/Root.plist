@@ -19,7 +19,8 @@
 
 			<key>cell</key>
 			<string>PSSwitchCell</string>
-			<key>default</key> <true/>
+			<key>default</key>
+			<true/>
 			<key>defaults</key>
 			<string>com.wrp1002.truedate</string>
 			
@@ -39,10 +40,10 @@
 			<key>key</key>
 			<string>kCalendar</string>
 			
-			
 			<key>cell</key>
 			<string>PSSwitchCell</string>
-			<key>default</key> <true/>
+			<key>default</key>
+			<false/>
 			<key>defaults</key>
 			<string>com.wrp1002.truedate</string>
 			
@@ -64,7 +65,8 @@
 
 			<key>cell</key>
 			<string>PSSwitchCell</string>
-			<key>default</key> <true/>
+			<key>default</key>
+			<true/>
 			<key>defaults</key>
 			<string>com.wrp1002.truedate</string>
 			
@@ -106,6 +108,31 @@
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
+			<key>footerText</key>
+			<string>Shows string format passed to date function. Used for debugging</string>
+		</dict>
+		<dict>
+			<key>label</key>
+			<string>Show date format</string>
+			<key>key</key>
+			<string>kDebug</string>
+			
+			
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.wrp1002.truedate</string>
+			
+			<key>PostNotification</key>
+			<string>com.wrp1002.truedate/ReloadPrefs</string>
+		</dict>
+
+
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -117,7 +144,7 @@
 			<key>cell</key>
 			<string>PSButtonCell</string>
 			<key>label</key>
-			<string>Respring...</string>
+			<string>Respring</string>
 			<key>action</key>
 			<string>respring</string>
 		</dict>

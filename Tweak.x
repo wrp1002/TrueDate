@@ -12,21 +12,21 @@
 #define kSettingsPath @"/var/mobile/Library/Preferences/com.wrp1002.truedate.plist"
 
 //	Tweak enabled
-bool enabled = false;
+bool enabled = true;
 
 //	Enables hooking into function that calendar icon uses. May cause changes elsewhere too
 bool calendarEnabled = false;
 
 //	Enables hooking into function that returns string of formatted date. Causes changes on lock screen, notification center, status bar clock, etc
-bool dateEnabled = false;
+bool dateEnabled = true;
 
 //	Time where the day will change to the "correct" day
 int rolloverHour = 0;
 
+//	Display string format of date before formatting takes place
+bool debugMode = false;
 
 bool springboardReady = false;
-
-
 
 //	Old code used to retrieve values from preferences. Respring needed
 /*
@@ -116,7 +116,6 @@ long GetPreviousDay() {
 
 //	Used to determine if the date should stay the same after specified time
 bool ShouldRollover() {
-	return false;
 	return (GetHour() >= rolloverHour);
 }
 
@@ -226,6 +225,10 @@ NSString *ReplaceWithRegex(NSString *str, NSString *newStr, NSString *pattern) {
 		NSString *dayStr = [NSString stringWithFormat:@"%li",day];
 		
 		NSString *format = [self dateFormat];
+		if (debugMode)
+			return format;
+
+
 		NSString *formatTmp = [format stringByReplacingOccurrencesOfString:@"E" withString:@"$"];
 		formatTmp = [formatTmp stringByReplacingOccurrencesOfString:@"d" withString:@"#"];
 		[self setDateFormat:formatTmp];
@@ -283,6 +286,7 @@ static void reloadPrefs() {
 	calendarEnabled = [prefs objectForKey:@"kCalendar"] ? [(NSNumber *)[prefs objectForKey:@"kCalendar"] boolValue] : calendarEnabled;
 	dateEnabled = [prefs objectForKey:@"kLockScreen"] ? [(NSNumber *)[prefs objectForKey:@"kLockScreen"] boolValue] : dateEnabled;
 	rolloverHour = [prefs objectForKey:@"kTime"] ? [(NSNumber *)[prefs objectForKey:@"kTime"] intValue] : rolloverHour;
+	debugMode = [prefs objectForKey:@"kDebug"] ? [(NSNumber *)[prefs objectForKey:@"kDebug"] boolValue] : debugMode;
 }
 
 
