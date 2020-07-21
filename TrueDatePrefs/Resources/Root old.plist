@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>items</key>
+	<array>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>TrueDate Preferences</string>
+		</dict>
+
+		<dict>
+			<key>label</key>
+			<string>Enable</string>
+			<key>key</key>
+			<string>kEnabled</string>
+
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<true/>
+			<key>defaults</key>
+			<string>com.wrp1002.truedate</string>
+			
+			<key>PostNotification</key>
+			<string>com.wrp1002.truedate/ReloadPrefs</string>
+		</dict>
+
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>footerText</key>
+			<string>Enables hooking into function that calendar icon uses. Currently only changes weekday. May cause changes elsewhere too</string>
+		</dict>
+		<dict>
+			<key>label</key>
+			<string>Calendar</string>
+			<key>key</key>
+			<string>kCalendar</string>
+			
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.wrp1002.truedate</string>
+			
+			<key>PostNotification</key>
+			<string>com.wrp1002.truedate/ReloadPrefs</string>
+		</dict>
+
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>footerText</key>
+			<string>Enables hooking into the function that is used to format the date. Causes changes on lock screen, notification center, status bar, etc</string>
+		</dict>
+		<dict>
+			<key>label</key>
+			<string>System-wide Date</string>
+			<key>key</key>
+			<string>kLockScreen</string>
+
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<true/>
+			<key>defaults</key>
+			<string>com.wrp1002.truedate</string>
+			
+			<key>PostNotification</key>
+			<string>com.wrp1002.truedate/ReloadPrefs</string>
+		</dict>
+
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>footerText</key>
+			<string>Time whenever date should rollover (24hr time)</string>
+		</dict>
+		<dict>
+			<key>label</key>
+			<string>Rollover Time</string>
+			<key>key</key>
+			<string>kTime</string>
+
+			<key>cell</key>
+			<string>PSSliderCell</string>
+			<key>default</key>
+			<integer>0</integer>
+			<key>defaults</key>
+			<string>com.wrp1002.truedate</string>
+			
+			<key>min</key>
+			<integer>0</integer>
+			<key>max</key>
+			<integer>24</integer>
+			<key>showValue</key> <true/>
+			<key>isSegmented</key> <true/>
+
+			<key>PostNotification</key>
+			<string>com.wrp1002.truedate/ReloadPrefs</string>
+		</dict>
+
+
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>footerText</key>
+			<string>Shows string format passed to date function. Used for debugging</string>
+		</dict>
+		<dict>
+			<key>label</key>
+			<string>Show date format</string>
+			<key>key</key>
+			<string>kDebug</string>
+			
+			
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.wrp1002.truedate</string>
+			
+			<key>PostNotification</key>
+			<string>com.wrp1002.truedate/ReloadPrefs</string>
+		</dict>
+
+
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>footerText</key>
+			<string>Respringing is not needed for changes to take effect</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>label</key>
+			<string>Respring</string>
+			<key>action</key>
+			<string>respring</string>
+		</dict>
+
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>label</key>
+			<string>GitHub Page</string>
+			<key>action</key>
+			<string>openGithub</string>
+		</dict>
+
+	</array>
+
+	<key>title</key>
+	<string>TrueDate</string>
+
+</dict>
+</plist>

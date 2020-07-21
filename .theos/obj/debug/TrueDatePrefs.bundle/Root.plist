@@ -32,29 +32,6 @@
 			<key>cell</key>
 			<string>PSGroupCell</string>
 			<key>footerText</key>
-			<string>Enables hooking into function that calendar icon uses. Currently only changes weekday. May cause changes elsewhere too</string>
-		</dict>
-		<dict>
-			<key>label</key>
-			<string>Calendar</string>
-			<key>key</key>
-			<string>kCalendar</string>
-			
-			<key>cell</key>
-			<string>PSSwitchCell</string>
-			<key>default</key>
-			<false/>
-			<key>defaults</key>
-			<string>com.wrp1002.truedate</string>
-			
-			<key>PostNotification</key>
-			<string>com.wrp1002.truedate/ReloadPrefs</string>
-		</dict>
-
-		<dict>
-			<key>cell</key>
-			<string>PSGroupCell</string>
-			<key>footerText</key>
 			<string>Enables hooking into the function that is used to format the date. Causes changes on lock screen, notification center, status bar, etc</string>
 		</dict>
 		<dict>

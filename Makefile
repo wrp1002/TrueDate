@@ -7,6 +7,10 @@ PACKAGE_VERSION = $(THEOS_PACKAGE_BASE_VERSION)
 TARGET := iphone:clang:latest:7.0
 INSTALL_TARGET_PROCESSES = SpringBoard
 
+ARCHS = armv7 arm64 arm64e
+#SDKVERSION = 11.2
+#SYSROOT = $(THEOS)/sdks/iPhoneOS13.3.sdk
+
 
 include $(THEOS)/makefiles/common.mk
 
