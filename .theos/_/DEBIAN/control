@@ -5,6 +5,6 @@ Description: Change the time when the date will rollover!
 Maintainer: Wes
 Author: Wes
 Section: Tweaks
-Depends: mobilesubstrate (>= 0.9.5000), ws.hbang.common (>= 1.2)
+Depends: mobilesubstrate (>= 0.9.5000), ws.hbang.common (>= 1.2), com.peterdev.libpddokdo
 Version: 1.0.4
-Installed-Size: 15964
+Installed-Size: 15904

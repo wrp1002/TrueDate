@@ -9,8 +9,9 @@
 			<string>PSGroupCell</string>
 			<key>label</key>
 			<string>TrueDate Preferences</string>
+			<key>footerText</key>
+			<string>Enables hooking into the function that is used to format the date. Causes changes on lock screen, notification center, status bar, etc</string>
 		</dict>
-
 		<dict>
 			<key>label</key>
 			<string>Enable</string>
@@ -26,13 +27,6 @@
 			
 			<key>PostNotification</key>
 			<string>com.wrp1002.truedate/ReloadPrefs</string>
-		</dict>
-
-		<dict>
-			<key>cell</key>
-			<string>PSGroupCell</string>
-			<key>footerText</key>
-			<string>Enables hooking into the function that is used to format the date. Causes changes on lock screen, notification center, status bar, etc</string>
 		</dict>
 		<dict>
 			<key>label</key>
@@ -51,15 +45,54 @@
 			<string>com.wrp1002.truedate/ReloadPrefs</string>
 		</dict>
 
+
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>Mode</string>
 			<key>footerText</key>
-			<string>Time whenever date should rollover (24hr time)</string>
+			<string>Hour mode: Specify what time the date should rollover (happens after midnight)&#xA;Sunset mode: Specify how many hours after sunset the date should rollover (use for early date rollover)&#xA;Sliders below only affect their individual modes</string>
 		</dict>
 		<dict>
+			<key>cell</key>
+			<string>PSSegmentCell</string>
+			<key>title</key>
+			<string>Mode</string>
+			<key>key</key>
+			<string>kMode</string>
+
+			<key>validTitles</key>
+			<array>
+				<string>Hour</string>
+				<string>Sunset</string>
+			</array>
+			<key>validValues</key>
+			<array>
+				<integer>0</integer>
+				<integer>1</integer>
+			</array>
+
+			<key>default</key>
+			<integer>0</integer>
+
+			<key>defaults</key>
+			<string>com.wrp1002.truedate</string>
+			
+			<key>PostNotification</key>
+			<string>com.wrp1002.truedate/ReloadPrefs</string>
+		</dict>
+
+		
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
 			<key>label</key>
-			<string>Rollover Time</string>
+			<string>Hour Mode</string>
+			<key>footerText</key>
+			<string>How many hours after midnight should the date rollover?</string>
+		</dict>
+		<dict>
 			<key>key</key>
 			<string>kTime</string>
 
@@ -73,7 +106,37 @@
 			<key>min</key>
 			<integer>0</integer>
 			<key>max</key>
-			<integer>24</integer>
+			<integer>12</integer>
+			<key>showValue</key> <true/>
+			<key>isSegmented</key> <true/>
+
+			<key>PostNotification</key>
+			<string>com.wrp1002.truedate/ReloadPrefs</string>
+		</dict>
+
+		<dict>
+			<key>cell</key>
+			<string>PSGroupCell</string>
+			<key>label</key>
+			<string>Sunset Mode</string>
+			<key>footerText</key>
+			<string>How many hours after sunset should the date rollover?</string>
+		</dict>
+		<dict>
+			<key>key</key>
+			<string>kSunsetTime</string>
+
+			<key>cell</key>
+			<string>PSSliderCell</string>
+			<key>default</key>
+			<integer>0</integer>
+			<key>defaults</key>
+			<string>com.wrp1002.truedate</string>
+			
+			<key>min</key>
+			<integer>0</integer>
+			<key>max</key>
+			<integer>6</integer>
 			<key>showValue</key> <true/>
 			<key>isSegmented</key> <true/>
 
@@ -110,25 +173,8 @@
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
-		</dict>
-		<dict>
-			<key>cell</key>
-			<string>PSGroupCell</string>
 			<key>footerText</key>
-			<string>Respringing is not needed for changes to take effect</string>
-		</dict>
-		<dict>
-			<key>cell</key>
-			<string>PSButtonCell</string>
-			<key>label</key>
-			<string>Respring</string>
-			<key>action</key>
-			<string>respring</string>
-		</dict>
-
-		<dict>
-			<key>cell</key>
-			<string>PSGroupCell</string>
+			<string>Respringing is NOT needed for changes to take effect</string>
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -137,6 +183,14 @@
 			<string>GitHub Page</string>
 			<key>action</key>
 			<string>openGithub</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSButtonCell</string>
+			<key>label</key>
+			<string>Respring</string>
+			<key>action</key>
+			<string>respring</string>
 		</dict>
 
 	</array>

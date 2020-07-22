@@ -3,6 +3,7 @@
 #import <CoreFoundation/CoreFoundation.h>
 #import <UIKit/UIKit.h>
 #import <notify.h>
+#import <PeterDev/libpddokdo.h>
 
 //NSDateComponents* components = [cal components:NSCalendarUnitMonth|NSCalendarUnitDay|NSCalendarUnitHour|NSCalendarUnitMinute|NSWeekdayCalendarUnit fromDate:date];
 
@@ -14,6 +15,8 @@
 //	Tweak enabled
 bool enabled = true;
 
+int mode = 0;
+
 //	Enables hooking into function that calendar icon uses. May cause changes elsewhere too
 bool calendarEnabled = false;
 
@@ -22,6 +25,9 @@ bool dateEnabled = true;
 
 //	Time where the day will change to the "correct" day
 int rolloverHour = 0;
+
+//	Time after sunset when date will rollover
+int sunsetOffset = 0;
 
 //	Display string format of date before formatting takes place
 bool debugMode = false;
@@ -67,7 +73,7 @@ long GetMinute() {
 long GetWeekday() {
 	NSDate *date = [NSDate date];
 	NSCalendar *cal = [NSCalendar currentCalendar];
-	NSDateComponents* components = [cal components:NSWeekdayCalendarUnit fromDate:date];
+	NSDateComponents* components = [cal components:NSCalendarUnitWeekday fromDate:date];
 
 	long weekday = [components weekday];
 
@@ -83,7 +89,23 @@ long GetPreviousWeekday() {
 		date = now;
 
 	NSCalendar *cal = [NSCalendar currentCalendar];
-	NSDateComponents* components = [cal components:NSWeekdayCalendarUnit fromDate:date];
+	NSDateComponents* components = [cal components:NSCalendarUnitWeekday fromDate:date];
+
+	long weekday = [components weekday];
+
+	return weekday;
+}
+
+//	Returns previous weekday 1-7 starting with Sunday
+long GetNextWeekday() {
+	NSDate *now = [NSDate date];
+	NSDate *date = [now dateByAddingTimeInterval:24*60*60];
+
+	if (calendarEnabled)
+		date = now;
+
+	NSCalendar *cal = [NSCalendar currentCalendar];
+	NSDateComponents* components = [cal components:NSCalendarUnitWeekday fromDate:date];
 
 	long weekday = [components weekday];
 
@@ -94,7 +116,7 @@ long GetPreviousWeekday() {
 long GetDay() {
 	NSDate *date = [NSDate date];
 	NSCalendar *cal = [NSCalendar currentCalendar];
-	NSDateComponents* components = [cal components:NSDayCalendarUnit fromDate:date];
+	NSDateComponents* components = [cal components:NSCalendarUnitDay fromDate:date];
 
 	long day = [components day];
 
@@ -107,16 +129,44 @@ long GetPreviousDay() {
 	NSDate *date = [now dateByAddingTimeInterval:-24*60*60];
 
 	NSCalendar *cal = [NSCalendar currentCalendar];
-	NSDateComponents* components = [cal components:NSDayCalendarUnit fromDate:date];
+	NSDateComponents* components = [cal components:NSCalendarUnitDay fromDate:date];
 
 	long day = [components day];
 
 	return day;
 }
 
+//	Calculate and return the date from tomorrow
+long GetNextDay() {
+	NSDate *now = [NSDate date];
+	NSDate *date = [now dateByAddingTimeInterval:24*60*60];
+
+	NSCalendar *cal = [NSCalendar currentCalendar];
+	NSDateComponents* components = [cal components:NSCalendarUnitDay fromDate:date];
+
+	long day = [components day];
+
+	return day;
+}
+
+long GetSunsetHour() {
+	[[PDDokdo sharedInstance] refreshWeatherData];
+	NSDate *sunset = [[PDDokdo sharedInstance] sunset];
+
+	NSCalendar *cal = [NSCalendar currentCalendar];
+	NSDateComponents* components = [cal components:NSCalendarUnitHour|NSCalendarUnitMinute fromDate:sunset];
+
+	long hour = [components hour];
+	long minute = [components minute];
+	if (minute > 30 && hour < 23)
+		hour += 1;
+
+	return hour;
+}
+
 //	Used to determine if the date should stay the same after specified time
-bool ShouldRollover() {
-	return (GetHour() >= rolloverHour);
+bool ShouldRollover(int targetHour) {
+	return (GetHour() >= targetHour);
 }
 
 //	Shows an alert box. Used for debugging
@@ -155,16 +205,17 @@ NSString *ReplaceWithRegex(NSString *str, NSString *newStr, NSString *pattern) {
 
 		//bool active = GetPrefsBool(@"kActive");
 		//rolloverHour = GetPrefsInt(@"kTime");
+		long sunsetHour = GetSunsetHour();
 		springboardReady = true;
 
-		//NSString *msg = [NSString stringWithFormat:@"Active: %s  Time:%i", enabled ? "true" : "false", rolloverHour];
-		//ShowAlert(msg);
+		NSString *msg = [NSString stringWithFormat:@"Active: %s  Time:%i  Sunset:%li", enabled ? "true" : "false", rolloverHour, sunsetHour];
+		ShowAlert(msg);
 		
 	}
 
 %end
 
-
+/*
 %hook NSDateComponents
 	-(long long)weekday {
 		long weekday = %orig();
@@ -194,8 +245,8 @@ NSString *ReplaceWithRegex(NSString *str, NSString *newStr, NSString *pattern) {
 		}
 
 		return day;
-	}*/
-%end
+	}
+%end*/
 
 
 /*
@@ -219,8 +270,18 @@ NSString *ReplaceWithRegex(NSString *str, NSString *newStr, NSString *pattern) {
 			return %orig(arg1);
 		}
 
-		long weekdayIndex = (ShouldRollover() ? GetWeekday() : GetPreviousWeekday()) - 1;
-		long day = ShouldRollover() ? GetDay() : GetPreviousDay();
+		long weekdayIndex = GetWeekday() - 1;
+		long day = GetDay(); 
+
+		if (mode == 0) {
+			weekdayIndex = (ShouldRollover(rolloverHour) ? GetWeekday() : GetPreviousWeekday()) - 1;
+			day = ShouldRollover(rolloverHour) ? GetDay() : GetPreviousDay();
+		}
+		else if (mode == 1) {
+			long sunsetHour = GetSunsetHour();
+			weekdayIndex = (ShouldRollover(sunsetHour + sunsetOffset) ? GetNextWeekday() : GetWeekday()) - 1;
+			day = ShouldRollover(sunsetHour + sunsetOffset) ? GetNextDay() : GetDay();
+		}
 
 		NSString *dayStr = [NSString stringWithFormat:@"%li",day];
 		
@@ -286,6 +347,8 @@ static void reloadPrefs() {
 	calendarEnabled = [prefs objectForKey:@"kCalendar"] ? [(NSNumber *)[prefs objectForKey:@"kCalendar"] boolValue] : calendarEnabled;
 	dateEnabled = [prefs objectForKey:@"kLockScreen"] ? [(NSNumber *)[prefs objectForKey:@"kLockScreen"] boolValue] : dateEnabled;
 	rolloverHour = [prefs objectForKey:@"kTime"] ? [(NSNumber *)[prefs objectForKey:@"kTime"] intValue] : rolloverHour;
+	sunsetOffset = [prefs objectForKey:@"kSunsetTime"] ? [(NSNumber *)[prefs objectForKey:@"kSunsetTime"] intValue] : sunsetOffset;
+	mode = [prefs objectForKey:@"kMode"] ? [(NSNumber *)[prefs objectForKey:@"kMode"] intValue] : mode;
 	debugMode = [prefs objectForKey:@"kDebug"] ? [(NSNumber *)[prefs objectForKey:@"kDebug"] boolValue] : debugMode;
 }
 
