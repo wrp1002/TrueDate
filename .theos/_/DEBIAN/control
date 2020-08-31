@@ -2,9 +2,9 @@ Package: com.wrp1002.truedate
 Name: TrueDate
 Architecture: iphoneos-arm
 Description: Change the time when the date will rollover!
-Maintainer: Wes
-Author: Wes
+Maintainer: Wes <wes.hamster@gmail.com>
+Author: Wes <wes.hamster@gmail.com>
 Section: Tweaks
 Depends: mobilesubstrate (>= 0.9.5000), ws.hbang.common (>= 1.2), com.peterdev.libpddokdo
-Version: 1.0.4
-Installed-Size: 15904
+Version: 1.0.5
+Installed-Size: 15844

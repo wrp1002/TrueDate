@@ -1,0 +1,32 @@
+{
+	"title": "TrueDate",
+	"description": "TrueDate stops the date on your phone from changing until a specific time. Useful for people who stay up late. Configure options in settings.",
+	"compatibility": "Built for iOS 13 but probably works for older versions",
+	"screenshots": ["screenshot1.png"],
+	"changelog": [
+		{
+			"version": "1.0.0",
+			"changes": ["Initial Release"]
+		}, 
+		{
+			"version": "1.0.1", 
+			"changes": ["Preferences should work correctly on fresh installs now"]
+		}, 
+		{
+			"version": "1.0.2", 
+			"changes": ["Fixed Wednesday bug"]
+		}, 
+		{
+			"version": "1.0.3", 
+			"changes": ["Removed calendar feature for now"]
+		}, 
+		{
+			"version": "1.0.4", 
+			"changes": ["Added support for arm64e"]
+		}, 
+		{
+			"version": "1.0.5", 
+			"changes": ["Added sunset feature"]
+		}
+	]
+}

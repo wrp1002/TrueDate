@@ -6,15 +6,13 @@
 #import <notify.h>
 #import <PeterDev/libpddokdo.h>
 
-
-
-
 #define kIdentifier @"com.wrp1002.truedate"
 #define kSettingsChangedNotification (CFStringRef)@"com.wrp1002.truedate/ReloadPrefs"
 #define kSettingsPath @"/var/mobile/Library/Preferences/com.wrp1002.truedate.plist"
 
 
 bool enabled = true;
+
 
 int mode = 0;
 
@@ -33,17 +31,76 @@ int sunsetOffset = 0;
 
 bool debugMode = false;
 
+
+const int sunsetUpdateRate = 7*24*60*60;	
+NSDate *nextSunsetUpdate;					
+long currentSunsetTime = 0;					
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+NSString *LogTweakName = @"TrueDate";
 bool springboardReady = false;
 
+UIWindow* GetKeyWindow() {
+    UIWindow        *foundWindow = nil;
+    NSArray         *windows = [[UIApplication sharedApplication]windows];
+    for (UIWindow   *window in windows) {
+        if (window.isKeyWindow) {
+            foundWindow = window;
+            break;
+        }
+    }
+    return foundWindow;
+}
 
 
+void ShowAlert(NSString *msg, NSString *title) {
+	if (!springboardReady) return;
+
+	UIAlertController * alert = [UIAlertController
+                                 alertControllerWithTitle:title
+                                 message:msg
+                                 preferredStyle:UIAlertControllerStyleAlert];
+
+    
+    UIAlertAction* dismissButton = [UIAlertAction
+                                actionWithTitle:@"Cool!"
+                                style:UIAlertActionStyleDefault
+                                handler:^(UIAlertAction * action) {
+                                    
+									
+                                }];
+
+    
+    [alert addAction:dismissButton];
+
+    [GetKeyWindow().rootViewController presentViewController:alert animated:YES completion:nil];
+}
 
 
+void Log(NSString *msg) {
+	NSLog(@"%@: %@", LogTweakName, msg);
+}
 
 
-
-
-
+void LogException(NSException *e) {
+	NSLog(@"%@: NSException caught", LogTweakName);
+	NSLog(@"%@: Name:%@", LogTweakName, e.name);
+	NSLog(@"%@: Reason:%@", LogTweakName, e.reason);
+	
+}
 
 
 
@@ -52,7 +109,7 @@ bool springboardReady = false;
 long GetHour() {
 	NSDate *date = [NSDate date];
 	NSCalendar *cal = [NSCalendar currentCalendar];
-	NSDateComponents* components = [cal components:NSCalendarUnitHour|NSCalendarUnitMinute|NSWeekdayCalendarUnit fromDate:date];
+	NSDateComponents* components = [cal components:NSCalendarUnitHour fromDate:date];
 
 	long hour = [components hour];
 
@@ -150,34 +207,45 @@ long GetNextDay() {
 	return day;
 }
 
+bool ShouldUpdateWeatherDate() {
+	NSDate *now = [NSDate date];
+
+	NSComparisonResult result = [now compare:nextSunsetUpdate];
+
+	if (result == NSOrderedDescending)
+		return true;
+	
+	return false;
+}
+
+void UpdateSunsetDate() {
+	NSDate *now = [NSDate date];
+	nextSunsetUpdate = [now dateByAddingTimeInterval:sunsetUpdateRate];
+}
+
 long GetSunsetHour() {
+	if (!ShouldUpdateWeatherDate()) {
+		return currentSunsetTime;
+	}
+	UpdateSunsetDate();
+
 	[[PDDokdo sharedInstance] refreshWeatherData];
 	NSDate *sunset = [[PDDokdo sharedInstance] sunset];
 
 	NSCalendar *cal = [NSCalendar currentCalendar];
 	NSDateComponents* components = [cal components:NSCalendarUnitHour|NSCalendarUnitMinute fromDate:sunset];
 
-	long hour = [components hour];
+	currentSunsetTime = [components hour];
 	long minute = [components minute];
-	if (minute > 30 && hour < 23)
-		hour += 1;
+	if (minute > 30 && currentSunsetTime < 23)
+		currentSunsetTime += 1;
 
-	return hour;
+	return currentSunsetTime;
 }
 
 
 bool ShouldRollover(int targetHour) {
 	return (GetHour() >= targetHour);
-}
-
-
-void ShowAlert(NSString *msg) {
-	UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Alert"
-	message:msg
-	delegate:nil
-	cancelButtonTitle:@"Cool!"
-	otherButtonTitles:nil];
-	[alert show];
 }
 
 NSString *ReplaceWithRegex(NSString *str, NSString *newStr, NSString *pattern) {
@@ -192,7 +260,6 @@ NSString *ReplaceWithRegex(NSString *str, NSString *newStr, NSString *pattern) {
 		return str;
 	}
 }
-
 
 
 #include <substrate.h>
@@ -218,7 +285,7 @@ NSString *ReplaceWithRegex(NSString *str, NSString *newStr, NSString *pattern) {
 @class NSDateFormatter; @class SpringBoard; 
 static void (*_logos_orig$_ungrouped$SpringBoard$applicationDidFinishLaunching$)(_LOGOS_SELF_TYPE_NORMAL SpringBoard* _LOGOS_SELF_CONST, SEL, id); static void _logos_method$_ungrouped$SpringBoard$applicationDidFinishLaunching$(_LOGOS_SELF_TYPE_NORMAL SpringBoard* _LOGOS_SELF_CONST, SEL, id); static id (*_logos_orig$_ungrouped$NSDateFormatter$stringFromDate$)(_LOGOS_SELF_TYPE_NORMAL NSDateFormatter* _LOGOS_SELF_CONST, SEL, id); static id _logos_method$_ungrouped$NSDateFormatter$stringFromDate$(_LOGOS_SELF_TYPE_NORMAL NSDateFormatter* _LOGOS_SELF_CONST, SEL, id); 
 
-#line 196 "Tweak.x"
+#line 263 "Tweak.x"
 
 
 	
@@ -231,14 +298,12 @@ static void (*_logos_orig$_ungrouped$SpringBoard$applicationDidFinishLaunching$)
 
 		
 		
-		long sunsetHour = GetSunsetHour();
+		
 		springboardReady = true;
 
-		NSString *msg = [NSString stringWithFormat:@"Active: %s  Time:%i  Sunset:%li", enabled ? "true" : "false", rolloverHour, sunsetHour];
-		ShowAlert(msg);
+		
 		
 	}
-
 
 
 
@@ -296,20 +361,35 @@ static void (*_logos_orig$_ungrouped$SpringBoard$applicationDidFinishLaunching$)
 			return _logos_orig$_ungrouped$NSDateFormatter$stringFromDate$(self, _cmd, arg1);
 		}
 
+		Log([NSString stringWithFormat:@"enabled:%d  dateEnabled:%d", enabled, dateEnabled]);
+
+		Log([NSString stringWithFormat:@"weekday:%ld", GetWeekday()]);
+		Log([NSString stringWithFormat:@"Day:%ld", GetDay()]);
+		Log([NSString stringWithFormat:@"shouldRollover:%d", ShouldRollover(rolloverHour)]);
+
+
 		long weekdayIndex = GetWeekday() - 1;
-		long day = GetDay(); 
+		long day = GetDay();
+
 
 		if (mode == 0) {
+			Log(@"Mode 0");
 			weekdayIndex = (ShouldRollover(rolloverHour) ? GetWeekday() : GetPreviousWeekday()) - 1;
 			day = ShouldRollover(rolloverHour) ? GetDay() : GetPreviousDay();
 		}
 		else if (mode == 1) {
+			Log(@"Mode 1");
 			long sunsetHour = GetSunsetHour();
 			weekdayIndex = (ShouldRollover(sunsetHour + sunsetOffset) ? GetNextWeekday() : GetWeekday()) - 1;
 			day = ShouldRollover(sunsetHour + sunsetOffset) ? GetNextDay() : GetDay();
 		}
 
+		Log([NSString stringWithFormat:@"Weekday:%ld", GetWeekday()]);
+		Log([NSString stringWithFormat:@"newWeekday:%ld", weekdayIndex]);
+
 		NSString *dayStr = [NSString stringWithFormat:@"%li",day];
+
+		Log([NSString stringWithFormat:@"dayStr:%@", dayStr]);
 		
 		NSString *format = [self dateFormat];
 		if (debugMode)
@@ -338,6 +418,9 @@ static void (*_logos_orig$_ungrouped$SpringBoard$applicationDidFinishLaunching$)
 			weekday = [self weekdaySymbols][weekdayIndex];
 
 
+		Log([NSString stringWithFormat:@"weekdayStr:%@", weekday]);
+
+
 		
 		
 
@@ -352,8 +435,6 @@ static void (*_logos_orig$_ungrouped$SpringBoard$applicationDidFinishLaunching$)
 
 
 static void reloadPrefs() {
-	
-
 	CFPreferencesAppSynchronize((CFStringRef)kIdentifier);
 
 	NSDictionary *prefs = nil;
@@ -379,10 +460,13 @@ static void reloadPrefs() {
 }
 
 
-static __attribute__((constructor)) void _logosLocalCtor_eb899c71(int __unused argc, char __unused **argv, char __unused **envp) {
+static __attribute__((constructor)) void _logosLocalCtor_a3111fcb(int __unused argc, char __unused **argv, char __unused **envp) {
 	reloadPrefs();
 	CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, (CFNotificationCallback)reloadPrefs, kSettingsChangedNotification, NULL, CFNotificationSuspensionBehaviorDeliverImmediately);
+
+	nextSunsetUpdate = [NSDate date];
+	Log(@"Init");
 }
 static __attribute__((constructor)) void _logosLocalInit() {
 {Class _logos_class$_ungrouped$SpringBoard = objc_getClass("SpringBoard"); { MSHookMessageEx(_logos_class$_ungrouped$SpringBoard, @selector(applicationDidFinishLaunching:), (IMP)&_logos_method$_ungrouped$SpringBoard$applicationDidFinishLaunching$, (IMP*)&_logos_orig$_ungrouped$SpringBoard$applicationDidFinishLaunching$);}Class _logos_class$_ungrouped$NSDateFormatter = objc_getClass("NSDateFormatter"); { MSHookMessageEx(_logos_class$_ungrouped$NSDateFormatter, @selector(stringFromDate:), (IMP)&_logos_method$_ungrouped$NSDateFormatter$stringFromDate$, (IMP*)&_logos_orig$_ungrouped$NSDateFormatter$stringFromDate$);}} }
-#line 360 "Tweak.x"
+#line 444 "Tweak.x"

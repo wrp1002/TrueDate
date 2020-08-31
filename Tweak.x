@@ -5,9 +5,6 @@
 #import <notify.h>
 #import <PeterDev/libpddokdo.h>
 
-//NSDateComponents* components = [cal components:NSCalendarUnitMonth|NSCalendarUnitDay|NSCalendarUnitHour|NSCalendarUnitMinute|NSWeekdayCalendarUnit fromDate:date];
-
-
 #define kIdentifier @"com.wrp1002.truedate"
 #define kSettingsChangedNotification (CFStringRef)@"com.wrp1002.truedate/ReloadPrefs"
 #define kSettingsPath @"/var/mobile/Library/Preferences/com.wrp1002.truedate.plist"
@@ -15,6 +12,7 @@
 //	Tweak enabled
 bool enabled = true;
 
+//	Hour or sunset
 int mode = 0;
 
 //	Enables hooking into function that calendar icon uses. May cause changes elsewhere too
@@ -32,7 +30,10 @@ int sunsetOffset = 0;
 //	Display string format of date before formatting takes place
 bool debugMode = false;
 
-bool springboardReady = false;
+
+const int sunsetUpdateRate = 7*24*60*60;	//	Once a week
+NSDate *nextSunsetUpdate;					//	Next date when the sunset time should be updated
+long currentSunsetTime = 0;					//	Current hour when the sun sets
 
 //	Old code used to retrieve values from preferences. Respring needed
 /*
@@ -46,12 +47,68 @@ int GetPrefsInt(NSString *key) {
 */
 
 
+//	=========================== Debugging stuff ===========================
+
+NSString *LogTweakName = @"TrueDate";
+bool springboardReady = false;
+
+UIWindow* GetKeyWindow() {
+    UIWindow        *foundWindow = nil;
+    NSArray         *windows = [[UIApplication sharedApplication]windows];
+    for (UIWindow   *window in windows) {
+        if (window.isKeyWindow) {
+            foundWindow = window;
+            break;
+        }
+    }
+    return foundWindow;
+}
+
+//	Shows an alert box. Used for debugging 
+void ShowAlert(NSString *msg, NSString *title) {
+	if (!springboardReady) return;
+
+	UIAlertController * alert = [UIAlertController
+                                 alertControllerWithTitle:title
+                                 message:msg
+                                 preferredStyle:UIAlertControllerStyleAlert];
+
+    //Add Buttons
+    UIAlertAction* dismissButton = [UIAlertAction
+                                actionWithTitle:@"Cool!"
+                                style:UIAlertActionStyleDefault
+                                handler:^(UIAlertAction * action) {
+                                    //Handle dismiss button action here
+									
+                                }];
+
+    //Add your buttons to alert controller
+    [alert addAction:dismissButton];
+
+    [GetKeyWindow().rootViewController presentViewController:alert animated:YES completion:nil];
+}
+
+//	Show log with tweak name as prefix for easy grep
+void Log(NSString *msg) {
+	NSLog(@"%@: %@", LogTweakName, msg);
+}
+
+//	Log exception info
+void LogException(NSException *e) {
+	NSLog(@"%@: NSException caught", LogTweakName);
+	NSLog(@"%@: Name:%@", LogTweakName, e.name);
+	NSLog(@"%@: Reason:%@", LogTweakName, e.reason);
+	//ShowAlert(@"TVLock Crash Avoided!", @"Alert");
+}
+
+
+//	=========================== Functions ===========================
 
 //	Returns current hour in 24hr time
 long GetHour() {
 	NSDate *date = [NSDate date];
 	NSCalendar *cal = [NSCalendar currentCalendar];
-	NSDateComponents* components = [cal components:NSCalendarUnitHour|NSCalendarUnitMinute|NSWeekdayCalendarUnit fromDate:date];
+	NSDateComponents* components = [cal components:NSCalendarUnitHour fromDate:date];
 
 	long hour = [components hour];
 
@@ -149,34 +206,45 @@ long GetNextDay() {
 	return day;
 }
 
+bool ShouldUpdateWeatherDate() {
+	NSDate *now = [NSDate date];
+
+	NSComparisonResult result = [now compare:nextSunsetUpdate];
+
+	if (result == NSOrderedDescending)
+		return true;
+	
+	return false;
+}
+
+void UpdateSunsetDate() {
+	NSDate *now = [NSDate date];
+	nextSunsetUpdate = [now dateByAddingTimeInterval:sunsetUpdateRate];
+}
+
 long GetSunsetHour() {
+	if (!ShouldUpdateWeatherDate()) {
+		return currentSunsetTime;
+	}
+	UpdateSunsetDate();
+
 	[[PDDokdo sharedInstance] refreshWeatherData];
 	NSDate *sunset = [[PDDokdo sharedInstance] sunset];
 
 	NSCalendar *cal = [NSCalendar currentCalendar];
 	NSDateComponents* components = [cal components:NSCalendarUnitHour|NSCalendarUnitMinute fromDate:sunset];
 
-	long hour = [components hour];
+	currentSunsetTime = [components hour];
 	long minute = [components minute];
-	if (minute > 30 && hour < 23)
-		hour += 1;
+	if (minute > 30 && currentSunsetTime < 23)
+		currentSunsetTime += 1;
 
-	return hour;
+	return currentSunsetTime;
 }
 
 //	Used to determine if the date should stay the same after specified time
 bool ShouldRollover(int targetHour) {
 	return (GetHour() >= targetHour);
-}
-
-//	Shows an alert box. Used for debugging
-void ShowAlert(NSString *msg) {
-	UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Alert"
-	message:msg
-	delegate:nil
-	cancelButtonTitle:@"Cool!"
-	otherButtonTitles:nil];
-	[alert show];
 }
 
 NSString *ReplaceWithRegex(NSString *str, NSString *newStr, NSString *pattern) {
@@ -192,7 +260,6 @@ NSString *ReplaceWithRegex(NSString *str, NSString *newStr, NSString *pattern) {
 	}
 }
 
-
 %hook SpringBoard
 
 	//	Called when springboard is finished launching
@@ -205,12 +272,11 @@ NSString *ReplaceWithRegex(NSString *str, NSString *newStr, NSString *pattern) {
 
 		//bool active = GetPrefsBool(@"kActive");
 		//rolloverHour = GetPrefsInt(@"kTime");
-		long sunsetHour = GetSunsetHour();
+		//long sunsetHour = GetSunsetHour();
 		springboardReady = true;
 
-		NSString *msg = [NSString stringWithFormat:@"Active: %s  Time:%i  Sunset:%li", enabled ? "true" : "false", rolloverHour, sunsetHour];
-		ShowAlert(msg);
-		
+		//NSString *msg = [NSString stringWithFormat:@"Active: %s  Time:%i  CurrentHr:%i  Sunset:%li", enabled ? "true" : "false", rolloverHour, GetHour(), GetSunsetHour()];
+		//ShowAlert(msg);
 	}
 
 %end
@@ -264,26 +330,40 @@ NSString *ReplaceWithRegex(NSString *str, NSString *newStr, NSString *pattern) {
 */
 
 %hook NSDateFormatter
-
 	-(id)stringFromDate:(id)arg1 {
 		if (!enabled || !dateEnabled) {
 			return %orig(arg1);
 		}
 
+		Log([NSString stringWithFormat:@"enabled:%d  dateEnabled:%d", enabled, dateEnabled]);
+
+		Log([NSString stringWithFormat:@"weekday:%ld", GetWeekday()]);
+		Log([NSString stringWithFormat:@"Day:%ld", GetDay()]);
+		Log([NSString stringWithFormat:@"shouldRollover:%d", ShouldRollover(rolloverHour)]);
+
+
 		long weekdayIndex = GetWeekday() - 1;
-		long day = GetDay(); 
+		long day = GetDay();
+
 
 		if (mode == 0) {
+			Log(@"Mode 0");
 			weekdayIndex = (ShouldRollover(rolloverHour) ? GetWeekday() : GetPreviousWeekday()) - 1;
 			day = ShouldRollover(rolloverHour) ? GetDay() : GetPreviousDay();
 		}
 		else if (mode == 1) {
+			Log(@"Mode 1");
 			long sunsetHour = GetSunsetHour();
 			weekdayIndex = (ShouldRollover(sunsetHour + sunsetOffset) ? GetNextWeekday() : GetWeekday()) - 1;
 			day = ShouldRollover(sunsetHour + sunsetOffset) ? GetNextDay() : GetDay();
 		}
 
+		Log([NSString stringWithFormat:@"Weekday:%ld", GetWeekday()]);
+		Log([NSString stringWithFormat:@"newWeekday:%ld", weekdayIndex]);
+
 		NSString *dayStr = [NSString stringWithFormat:@"%li",day];
+
+		Log([NSString stringWithFormat:@"dayStr:%@", dayStr]);
 		
 		NSString *format = [self dateFormat];
 		if (debugMode)
@@ -312,6 +392,9 @@ NSString *ReplaceWithRegex(NSString *str, NSString *newStr, NSString *pattern) {
 			weekday = [self weekdaySymbols][weekdayIndex];
 
 
+		Log([NSString stringWithFormat:@"weekdayStr:%@", weekday]);
+
+
 		//NSString *result = [formattedDate stringByReplacingOccurrencesOfString:@"$" withString:weekday];
 		//result = [result stringByReplacingOccurrencesOfString:@"#" withString:dayStr];
 
@@ -326,8 +409,6 @@ NSString *ReplaceWithRegex(NSString *str, NSString *newStr, NSString *pattern) {
 
 //	Called whenever any preferences are changed to update variables
 static void reloadPrefs() {
-	//if (springboardReady) ShowAlert(@"Prefs changed!");
-
 	CFPreferencesAppSynchronize((CFStringRef)kIdentifier);
 
 	NSDictionary *prefs = nil;
@@ -356,4 +437,7 @@ static void reloadPrefs() {
 %ctor {
 	reloadPrefs();
 	CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), NULL, (CFNotificationCallback)reloadPrefs, kSettingsChangedNotification, NULL, CFNotificationSuspensionBehaviorDeliverImmediately);
+
+	nextSunsetUpdate = [NSDate date];
+	Log(@"Init");
 }
